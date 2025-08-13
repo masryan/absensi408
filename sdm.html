@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kantorku - Manajemen SDM</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+    <div class="d-flex">
+        <!-- Sidebar (sama dengan dashboard.html) -->
+        <!-- ... -->
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <nav class="navbar navbar-expand-lg navbar-light bg-light">
+                <div class="container-fluid">
+                    <span class="navbar-brand">Manajemen SDM</span>
+                    <div class="d-flex align-items-center">
+                        <span id="currentDateTime" class="me-3"></span>
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown">
+                                <i class="bi bi-person-circle"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="#">Profil</a></li>
+                                <li><a class="dropdown-item" href="#" id="logoutBtn2">Logout</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="container-fluid p-4">
+                <ul class="nav nav-tabs" id="sdmTabs">
+                    <li class="nav-item">
+                        <a class="nav-link active" data-bs-toggle="tab" href="#attendanceTab">Absensi</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" href="#leaveTab">Ijin & Cuti</a>
+                    </li>
+                    <li class="nav-item" id="adminTab" style="display:none;">
+                        <a class="nav-link" data-bs-toggle="tab" href="#adminTabContent">Admin</a>
+                    </li>
+                </ul>
+
+                <div class="tab-content mt-3">
+                    <!-- Tab Absensi -->
+                    <div class="tab-pane fade show active" id="attendanceTab">
+                        <div class="card mb-4">
+                            <div class="card-header bg-primary text-white">
+                                <h5>Absensi Hari Ini</h5>
+                            </div>
+                            <div class="card-body text-center">
+                                <div id="attendanceStatus" class="mb-3">
+                                    <p class="fs-4">Status: <span id="statusText">Belum Absen</span></p>
+                                </div>
+                                <div class="d-flex justify-content-center gap-3">
+                                    <button id="checkInBtn" class="btn btn-success">
+                                        <i class="bi bi-box-arrow-in-down"></i> Absen Masuk
+                                    </button>
+                                    <button id="checkOutBtn" class="btn btn-danger" disabled>
+                                        <i class="bi bi-box-arrow-up"></i> Absen Pulang
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                                <h5>Riwayat Absensi</h5>
+                                <div class="d-flex gap-2">
+                                    <input type="date" id="startDate" class="form-control form-control-sm">
+                                    <input type="date" id="endDate" class="form-control form-control-sm">
+                                    <button id="filterAttendanceBtn" class="btn btn-light btn-sm">Filter</button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table id="attendanceTable" class="table table-striped" style="width:100%">
+                                        <thead>
+                                            <tr>
+                                                <th>Tanggal</th>
+                                                <th>Jam Masuk</th>
+                                                <th>Status</th>
+                                                <th>Jam Pulang</th>
+                                                <th>Status</th>
+                                                <th>Lokasi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Data akan diisi oleh JavaScript -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab Ijin & Cuti -->
+                    <div class="tab-pane fade" id="leaveTab">
+                        <div class="card mb-4">
+                            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                                <h5>Pengajuan Ijin & Cuti</h5>
+                                <button id="newLeaveBtn" class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#leaveModal">
+                                    <i class="bi bi-plus-circle"></i> Ajukan Baru
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table id="leaveTable" class="table table-striped" style="width:100%">
+                                        <thead>
+                                            <tr>
+                                                <th>Tanggal Pengajuan</th>
+                                                <th>Jenis</th>
+                                                <th>Tanggal Mulai</th>
+                                                <th>Tanggal Selesai</th>
+                                                <th>Durasi</th>
+                                                <th>Alasan</th>
+                                                <th>Status</th>
+                                                <th>Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Data akan diisi oleh JavaScript -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab Admin (hanya untuk admin) -->
+                    <div class="tab-pane fade" id="adminTabContent">
+                        <div class="card mb-4">
+                            <div class="card-header bg-primary text-white">
+                                <h5>Kelola Pengajuan Ijin & Cuti</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table id="adminLeaveTable" class="table table-striped" style="width:100%">
+                                        <thead>
+                                            <tr>
+                                                <th>Nama Pegawai</th>
+                                                <th>Jenis</th>
+                                                <th>Tanggal Mulai</th>
+                                                <th>Tanggal Selesai</th>
+                                                <th>Durasi</th>
+                                                <th>Alasan</th>
+                                                <th>Status</th>
+                                                <th>Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Data akan diisi oleh JavaScript -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card mb-4">
+                            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                                <h5>Rekap Absensi</h5>
+                                <div class="d-flex gap-2">
+                                    <select id="employeeSelect" class="form-select form-select-sm">
+                                        <option value="">Semua Pegawai</option>
+                                    </select>
+                                    <input type="date" id="adminStartDate" class="form-control form-control-sm">
+                                    <input type="date" id="adminEndDate" class="form-control form-control-sm">
+                                    <button id="adminFilterBtn" class="btn btn-light btn-sm">Filter</button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table id="adminAttendanceTable" class="table table-striped" style="width:100%">
+                                        <thead>
+                                            <tr>
+                                                <th>Nama Pegawai</th>
+                                                <th>Tanggal</th>
+                                                <th>Jam Masuk</th>
+                                                <th>Status</th>
+                                                <th>Jam Pulang</th>
+                                                <th>Status</th>
+                                                <th>Lokasi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Data akan diisi oleh JavaScript -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header bg-primary text-white">
+                                <h5>Pengaturan</h5>
+                            </div>
+                            <div class="card-body">
+                                <ul class="nav nav-tabs" id="settingsTabs">
+                                    <li class="nav-item">
+                                        <a class="nav-link active" data-bs-toggle="tab" href="#locationSettings">Lokasi Absensi</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" data-bs-toggle="tab" href="#workHoursSettings">Jam Kerja</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" data-bs-toggle="tab" href="#holidaySettings">Hari Libur</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" data-bs-toggle="tab" href="#leaveBalanceSettings">Saldo Cuti</a>
+                                    </li>
+                                </ul>
+
+                                <div class="tab-content mt-3">
+                                    <div class="tab-pane fade show active" id="locationSettings">
+                                        <form id="locationForm">
+                                            <div class="row mb-3">
+                                                <div class="col-md-6">
+                                                    <label for="latitude" class="form-label">Latitude Kantor</label>
+                                                    <input type="text" class="form-control" id="latitude" value="-6.306848" required>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="longitude" class="form-label">Longitude Kantor</label>
+                                                    <input type="text" class="form-control" id="longitude" value="107.306455" required>
+                                                </div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="radius" class="form-label">Radius Maksimal (meter)</label>
+                                                <input type="number" class="form-control" id="radius" value="100" required>
+                                            </div>
+                                            <button type="submit" class="btn btn-primary">Simpan Pengaturan</button>
+                                        </form>
+                                    </div>
+
+                                    <div class="tab-pane fade" id="workHoursSettings">
+                                        <form id="workHoursForm">
+                                            <div class="mb-3">
+                                                <label class="form-label">Cleaning Service</label>
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <label for="csStart" class="form-label">Jam Masuk</label>
+                                                        <input type="time" class="form-control" id="csStart" value="06:00" required>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label for="csEnd" class="form-label">Jam Pulang</label>
+                                                        <input type="time" class="form-control" id="csEnd" value="17:30" required>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label class="form-label">Pramubakti</label>
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <label for="pbStart" class="form-label">Jam Masuk</label>
+                                                        <input type="time" class="form-control" id="pbStart" value="07:00" required>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label for="pbEnd" class="form-label">Jam Pulang</label>
+                                                        <input type="time" class="form-control" id="pbEnd" value="17:00" required>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label class="form-label">Satpam - Shift Pagi</label>
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <label for="spStart" class="form-label">Jam Masuk</label>
+                                                        <input type="time" class="form-control" id="spStart" value="07:00" required>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label for="spEnd" class="form-label">Jam Pulang</label>
+                                                        <input type="time" class="form-control" id="spEnd" value="19:00" required>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label class="form-label">Satpam - Shift Malam</label>
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <label for="smStart" class="form-label">Jam Masuk</label>
+                                                        <input type="time" class="form-control" id="smStart" value="19:00" required>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label for="smEnd" class="form-label">Jam Pulang</label>
+                                                        <input type="time" class="form-control" id="smEnd" value="07:00" required>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <button type="submit" class="btn btn-primary">Simpan Pengaturan</button>
+                                        </form>
+                                    </div>
+
+                                    <div class="tab-pane fade" id="holidaySettings">
+                                        <div class="d-flex justify-content-between mb-3">
+                                            <h6>Daftar Hari Libur</h6>
+                                            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addHolidayModal">
+                                                <i class="bi bi-plus"></i> Tambah Hari Libur
+                                            </button>
+                                        </div>
+                                        <div class="table-responsive">
+                                            <table id="holidayTable" class="table table-striped">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Tanggal</th>
+                                                        <th>Keterangan</th>
+                                                        <th>Aksi</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <!-- Data akan diisi oleh JavaScript -->
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                    <div class="tab-pane fade" id="leaveBalanceSettings">
+                                        <div class="table-responsive">
+                                            <table id="leaveBalanceTable" class="table table-striped">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Nama Pegawai</th>
+                                                        <th>SPK</th>
+                                                        <th>Tahun</th>
+                                                        <th>Saldo Cuti</th>
+                                                        <th>Cuti Terpakai</th>
+                                                        <th>Sisa Cuti</th>
+                                                        <th>Aksi</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <!-- Data akan diisi oleh JavaScript -->
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Pengajuan Cuti -->
+    <div class="modal fade" id="leaveModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Pengajuan Ijin/Cuti</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="leaveForm">
+                        <div class="mb-3">
+                            <label for="leaveType" class="form-label">Jenis Ijin/Cuti</label>
+                            <select class="form-select" id="leaveType" required>
+                                <option value="">Pilih Jenis</option>
+                                <option value="Ijin Tidak Masuk">Ijin Tidak Masuk</option>
+                                <option value="Cuti Sakit">Cuti Sakit</option>
+                                <option value="Cuti Alasan Penting">Cuti Alasan Penting</option>
+                                <option value="Cuti Tahunan">Cuti Tahunan</option>
+                            </select>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="startDateLeave" class="form-label">Tanggal Mulai</label>
+                                <input type="date" class="form-control" id="startDateLeave" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="endDateLeave" class="form-label">Tanggal Selesai</label>
+                                <input type="date" class="form-control" id="endDateLeave" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="halfDayLeave" class="form-label">Durasi</label>
+                            <select class="form-select" id="halfDayLeave">
+                                <option value="0">Hari Penuh</option>
+                                <option value="1">Setengah Hari (Pagi)</option>
+                                <option value="2">Setengah Hari (Sore)</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="leaveReason" class="form-label">Alasan</label>
+                            <textarea class="form-control" id="leaveReason" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <p>Saldo Cuti Tersedia: <span id="availableLeaveBalance" class="fw-bold">6</span> hari</p>
+                            <p>Durasi Pengajuan: <span id="leaveDuration" class="fw-bold">0</span> hari</p>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" id="submitLeaveBtn">Ajukan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Tambah Hari Libur -->
+    <div class="modal fade" id="addHolidayModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Tambah Hari Libur</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="holidayForm">
+                        <div class="mb-3">
+                            <label for="holidayDate" class="form-label">Tanggal</label>
+                            <input type="date" class="form-control" id="holidayDate" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="holidayDesc" class="form-label">Keterangan</label>
+                            <input type="text" class="form-control" id="holidayDesc" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" id="submitHolidayBtn">Simpan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Cetak Cuti -->
+    <div class="modal fade" id="printLeaveModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Formulir Cuti</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="printLeaveContent">
+                    <!-- Konten formulir cuti akan diisi oleh JavaScript -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    <button type="button" class="btn btn-primary" onclick="window.print()">Cetak</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/sdm.js"></script>
+</body>
+</html>
